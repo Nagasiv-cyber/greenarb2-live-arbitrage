@@ -494,9 +494,13 @@ if d:
                 lons = np.degrees(np.arctan2(y, x))
                 return lats.tolist(), lons.tolist()
 
-            NYSE_LAT, NYSE_LON = 40.7128, -74.0060
-            NSE_LAT,  NSE_LON  = 19.0760,  72.8777
-            arc_lats, arc_lons = _arc_lats_lons(NYSE_LAT, NYSE_LON, NSE_LAT, NSE_LON)
+            GLOBAL_HUBS = [
+                {"id": "NYSE", "label": "NYSE · New York",  "lat": 40.7128, "lon": -74.0060,  "color": "#00ff9d"},
+                {"id": "LSE",  "label": "LSE · London",     "lat": 51.5074, "lon": -0.1278,   "color": "#cc44ff"},
+                {"id": "NSE",  "label": "NSE · Mumbai",     "lat": 19.0760, "lon": 72.8777,   "color": "#00ccff"},
+                {"id": "TSE",  "label": "TSE · Tokyo",      "lat": 35.6762, "lon": 139.6503,  "color": "#ffaa44"},
+                {"id": "HKEX", "label": "HKEX · Hong Kong", "lat": 22.3193, "lon": 114.1694,  "color": "#ff4b4b"},
+            ]
 
             fig_globe = go.Figure()
 
@@ -514,15 +518,25 @@ if d:
             )
 
             # ── Execute arcs from history (most recent 12) ───────────────────
-            ARC_COLORS = ["#00ff9d", "#00ccff", "#ffaa44", "#cc44ff"]
             execute_scans = ph[ph["Server_Wattage"] == 1000].tail(12) if not ph.empty else pd.DataFrame()
             n_arcs = len(execute_scans)
-
+            
+            latest_route = "Scanning..."
+            latest_latency = 0
+            import random
+            
             for i, (_, row) in enumerate(execute_scans.iterrows()):
+                # Use deterministic random so arcs don't flicker on Streamlit rerun
+                random.seed(int(row["Timestamp"].replace(':', '')) + i)
+                h1, h2 = random.sample(GLOBAL_HUBS, 2)
+                arc_lats, arc_lons = _arc_lats_lons(h1["lat"], h1["lon"], h2["lat"], h2["lon"])
+
                 age       = n_arcs - i          # newest = n_arcs, oldest = 1
                 opacity   = max(0.15, age / n_arcs * 0.9)
-                color     = ARC_COLORS[i % len(ARC_COLORS)]
+                color     = h1["color"]
+                
                 # slight lat jitter for fiber-optic bundle spread
+                np.random.seed(int(row["Timestamp"].replace(':', '')) + i)
                 jitter    = np.random.uniform(-0.5, 0.5, len(arc_lats))
                 j_lats    = [l + jitter[k] for k, l in enumerate(arc_lats)]
 
@@ -535,35 +549,29 @@ if d:
                     showlegend = False,
                     hoverinfo  = "skip",
                 ))
+                
+                if i == n_arcs - 1:
+                    latest_route = f"{h1['id']} ⟶ {h2['id']}"
+                    latest_latency = random.randint(35, 120)
+            
+            # reset random seeds
+            random.seed()
+            np.random.seed()
 
-            # ── NYSE marker ──────────────────────────────────────────────────
-            fig_globe.add_trace(go.Scattergeo(
-                lat        = [NYSE_LAT],
-                lon        = [NYSE_LON],
-                mode       = "markers+text",
-                marker     = dict(size=12, color="#00ff9d", symbol="circle",
-                                  line=dict(width=2, color="#00ff9d")),
-                text       = ["NYSE · NY"],
-                textposition = "top right",
-                textfont   = dict(family="Share Tech Mono", size=10, color="#00ff9d"),
-                name       = "NYSE · New York",
-                hovertemplate = "<b>NYSE</b><br>40.71°N 74.01°W<extra></extra>",
-            ))
-
-            # ── NSE marker ───────────────────────────────────────────────────
-            fig_globe.add_trace(go.Scattergeo(
-                lat        = [NSE_LAT],
-                lon        = [NSE_LON],
-                mode       = "markers+text",
-                marker     = dict(size=12, color="#00ccff", symbol="circle",
-                                  line=dict(width=2, color="#00ccff")),
-                text       = ["NSE · Mumbai"],
-                textposition = "bottom right",
-                textfont   = dict(family="Share Tech Mono", size=10, color="#00ccff"),
-                name       = "NSE · Mumbai",
-                hovertemplate = "<b>NSE</b><br>19.08°N 72.88°E<extra></extra>",
-            ))
-
+            # ── Draw 5 Hub Markers ──────────────────────────────────────────────────
+            for hub in GLOBAL_HUBS:
+                fig_globe.add_trace(go.Scattergeo(
+                    lat        = [hub["lat"]],
+                    lon        = [hub["lon"]],
+                    mode       = "markers+text",
+                    marker     = dict(size=10, color=hub["color"], symbol="circle",
+                                      line=dict(width=2, color=hub["color"])),
+                    text       = [hub["label"]],
+                    textposition = "bottom right",
+                    textfont   = dict(family="Share Tech Mono", size=10, color=hub["color"]),
+                    name       = hub["label"],
+                    hovertemplate = f"<b>{hub['id']}</b><br>{abs(hub['lat']):.2f}°{'N' if hub['lat']>=0 else 'S'} {abs(hub['lon']):.2f}°{'E' if hub['lon']>=0 else 'W'}<extra></extra>",
+                ))
             fig_globe.update_layout(
                 paper_bgcolor = "rgba(0,0,0,0)",
                 plot_bgcolor  = "rgba(0,0,0,0)",
@@ -592,10 +600,10 @@ if d:
             tl1, tl2, tl3, tl4 = st.columns(4)
             status_text  = "ARBITRAGE LOCKED ✅" if n_arcs > 0 else "Scanning Order Books…"
             status_color = "#00ff9d" if n_arcs > 0 else "#2a4a3a"
-            tl1.markdown(f"<div class='metric-card' style='border-left-color:#00ff9d'><div class='metric-label'>Swarm Routes In Flight</div><div class='metric-value' style='font-size:1.6rem'>{n_arcs}</div><div class='metric-sub'>NYSE ⟶ NSE arcs</div></div>", unsafe_allow_html=True)
-            tl2.markdown(f"<div class='metric-card' style='border-left-color:#00ccff'><div class='metric-label'>Route</div><div class='metric-value' style='font-size:1rem;color:#00ccff'>NYSE ⟶ NSE</div><div class='metric-sub'>New York → Mumbai</div></div>", unsafe_allow_html=True)
-            tl3.markdown(f"<div class='metric-card' style='border-left-color:#ffaa44'><div class='metric-label'>Sim Latency</div><div class='metric-value' style='font-size:1.6rem;color:#ffaa44'>42ms</div><div class='metric-sub'>Fiber optic route</div></div>", unsafe_allow_html=True)
-            tl4.markdown(f"<div class='metric-card' style='border-left-color:{status_color}'><div class='metric-label'>Status</div><div class='metric-value' style='font-size:.9rem;color:{status_color}'>{status_text}</div><div class='metric-sub'>Real-time gate decision</div></div>", unsafe_allow_html=True)
+            tl1.markdown(f"<div class='metric-card' style='border-left-color:#00ff9d'><div class='metric-label'>Swarm Routes In Flight</div><div class='metric-value' style='font-size:1.6rem'>{n_arcs}</div><div class='metric-sub'>Global Hub Arcs</div></div>", unsafe_allow_html=True)
+            tl2.markdown(f"<div class='metric-card' style='border-left-color:#00ccff'><div class='metric-label'>Latest Route</div><div class='metric-value' style='font-size:1rem;color:#00ccff'>{latest_route}</div><div class='metric-sub'>Dynamic Swarm Path</div></div>", unsafe_allow_html=True)
+            tl3.markdown(f"<div class='metric-card' style='border-left-color:#ffaa44'><div class='metric-label'>Sim Latency</div><div class='metric-value' style='font-size:1.6rem;color:#ffaa44'>{latest_latency if n_arcs > 0 else 0}ms</div><div class='metric-sub'>Fiber optic route</div></div>", unsafe_allow_html=True)
+            tl4.markdown(f"<div class='metric-card' style='border-left-color:{status_color}'><div class='metric-label'>Status</div><div class='metric-value' style='font-size:.9rem;color:{status_color}'>{status_text}</div><div class='metric-sub'>Executing across {len(GLOBAL_HUBS)} hubs</div></div>", unsafe_allow_html=True)
 
     sc_col = "#00ff9d" if d["data_status"] == "SIMULATED" else "#ff8c00"
     st.markdown(f"<div style='font-family:Share Tech Mono,monospace;font-size:.63rem;color:{sc_col};letter-spacing:2px;margin-top:.4rem;'>▸ {d['data_status']} | BROWNIAN VOL: ±0.2% | LAST: {d['timestamp']}</div>", unsafe_allow_html=True)

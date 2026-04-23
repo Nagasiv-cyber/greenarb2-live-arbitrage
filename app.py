@@ -526,8 +526,11 @@ if d:
             import random
             
             for i, (_, row) in enumerate(execute_scans.iterrows()):
+                # Extract only digits from timestamp for deterministic random seed
+                seed_val = int(''.join(filter(str.isdigit, str(row["Timestamp"])))) + i
+                
                 # Use deterministic random so arcs don't flicker on Streamlit rerun
-                random.seed(int(row["Timestamp"].replace(':', '')) + i)
+                random.seed(seed_val)
                 h1, h2 = random.sample(GLOBAL_HUBS, 2)
                 arc_lats, arc_lons = _arc_lats_lons(h1["lat"], h1["lon"], h2["lat"], h2["lon"])
 
@@ -536,7 +539,7 @@ if d:
                 color     = h1["color"]
                 
                 # slight lat jitter for fiber-optic bundle spread
-                np.random.seed(int(row["Timestamp"].replace(':', '')) + i)
+                np.random.seed(seed_val % (2**32 - 1))
                 jitter    = np.random.uniform(-0.5, 0.5, len(arc_lats))
                 j_lats    = [l + jitter[k] for k, l in enumerate(arc_lats)]
 

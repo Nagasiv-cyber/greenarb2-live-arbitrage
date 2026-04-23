@@ -610,6 +610,208 @@ if d:
                 rows += f"<tr><td style='color:#5a7a6a'>{r['Timestamp']}</td><td>{r['NSE']}</td><td>{r['NYSE']}</td><td>{r['Spread']}</td><td>{r['EAA']}</td><td style='color:{c}'>{r['Decision']}</td><td>{r['Power']}</td><td style='color:#ffaa44'>{r['CCU']}</td></tr>"
             st.markdown(f"<table style='width:100%;border-collapse:collapse;font-family:Share Tech Mono,monospace;font-size:.7rem;color:#7aaa9a;'><thead><tr style='color:#00ff9d;border-bottom:1px solid #1a3328;'><th>Time</th><th>NSE</th><th>NYSE</th><th>Spread</th><th>EAA</th><th>Decision</th><th>Power</th><th>CCU</th></tr></thead><tbody>{rows}</tbody></table>", unsafe_allow_html=True)
 
+# ── Advanced Modules ──────────────────────────────────────────────────────────
+st.markdown('<div class="slbl">▸ Advanced Intelligence Modules</div>', unsafe_allow_html=True)
+adv1, adv2 = st.columns(2)
+
+# ── NLP SENTINEL ──────────────────────────────────────────────────────────────
+with adv1:
+    NLP_HEADLINES = [
+        ("Fed signals two additional rate cuts in H2 2025 — dovish pivot confirmed",    0.72),
+        ("India NSE halts trading circuit breaker triggered by FII sell-off",           -0.85),
+        ("Infosys Q4 beats estimates: EPS ₹22.4 vs ₹20.1 expected",                    0.68),
+        ("SEC launches probe into cross-border ADR arbitrage practices",                -0.61),
+        ("SEBI proposes T+0 settlement for Nifty 50 constituents by Q3",                0.45),
+        ("Global credit tightening fears resurface as ECB holds rates",                 -0.38),
+        ("USD/INR approaches 84.20 — RBI likely to intervene via OMO",                 -0.29),
+        ("HDFC Bank ADR premium hits 6-month high on strong NIM guidance",              0.81),
+        ("Crude oil spikes 4.2% on OPEC+ surprise output cut announcement",             -0.55),
+        ("Wipro wins $1.2B AI infrastructure deal with US defense contractor",          0.77),
+        ("China PMI contracts for third consecutive month — EM contagion risk",         -0.73),
+        ("Tata Motors EV division IPO files S-1 with NYSE — $8B valuation",             0.88),
+        ("Bank of Japan unexpectedly widens YCC band — yen carry unwind risk",          -0.44),
+        ("CPI data hotter than expected: 3.8% vs 3.5% forecast — risk-off mode",       -0.79),
+        ("Reliance Industries to spin off Jio Financial — ADR implications positive",   0.62),
+    ]
+
+    if "nlp_ptr" not in st.session_state:
+        st.session_state.nlp_ptr  = 0
+        st.session_state.nlp_feed = []
+
+    # Advance pointer on each scan
+    if run_now:
+        ptr = st.session_state.nlp_ptr % len(NLP_HEADLINES)
+        h, base = NLP_HEADLINES[ptr]
+        s = round(base + np.random.uniform(-0.1, 0.1), 3)
+        ts = datetime.now().strftime("%H:%M:%S")
+        st.session_state.nlp_feed.append({"text": h, "s": s, "ts": ts})
+        st.session_state.nlp_feed = st.session_state.nlp_feed[-10:]
+        st.session_state.nlp_ptr += 1
+
+    feed = st.session_state.nlp_feed
+    rolling = round(sum(e["s"] for e in feed[-5:]) / max(len(feed[-5:]), 1), 3) if feed else 0
+    gauge_pct = int(((rolling + 1) / 2) * 100)
+    vol_color  = "#ff4b4b" if rolling < -0.3 else "#00ff9d" if rolling > 0 else "#ffaa44"
+    vol_text   = "⚠ VOLATILITY DETECTED — Raising Execution Threshold" if rolling < -0.3 else \
+                 "✅ MACRO STABLE — Normal EAA Gate Active" if rolling > 0 else "⏳ SENTIMENT NEUTRAL"
+
+    st.markdown(f"""
+    <div style="background:rgba(11,15,18,0.72);backdrop-filter:blur(14px);
+      border:1px solid {vol_color}44;border-left:3px solid {vol_color};
+      border-radius:8px;padding:12px 14px;font-family:Share Tech Mono,monospace;">
+      <div style="font-size:10px;letter-spacing:3px;color:#00ff9d;margin-bottom:8px;">
+        ⚡ NLP SENTINEL — Macro Sentiment Engine</div>
+      <div style="background:{vol_color}18;border:1px solid {vol_color}55;border-radius:4px;
+        padding:5px 10px;font-size:10px;font-weight:bold;color:{vol_color};
+        letter-spacing:1px;margin-bottom:10px;">{vol_text}</div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:#4a6a5a;margin-bottom:4px;">
+        <span>BEAR -1.0</span>
+        <span style="color:{vol_color};font-weight:bold">ROLLING AVG: {'+' if rolling>=0 else ''}{rolling}</span>
+        <span>BULL +1.0</span></div>
+      <div style="background:#0d1318;border-radius:3px;height:8px;border:1px solid #1e3a2a;overflow:hidden;margin-bottom:10px;">
+        <div style="width:{gauge_pct}%;height:100%;
+          background:linear-gradient(90deg,#ff4b4b,{vol_color});
+          border-radius:3px;transition:width .6s;"></div></div>
+    </div>""", unsafe_allow_html=True)
+
+    if feed:
+        rows_html = ""
+        for e in reversed(feed[-8:]):
+            sc = "#00ff9d" if e["s"] > 0.2 else "#ff4b4b" if e["s"] < -0.2 else "#ffaa44"
+            rows_html += f"<tr><td style='color:#2a4a3a;white-space:nowrap'>{e['ts']}</td><td style='color:#8aadaa;padding:2px 8px'>{e['text'][:68]}…</td><td style='color:{sc};font-weight:bold;white-space:nowrap'>{'+' if e['s']>=0 else ''}{e['s']}</td></tr>"
+        st.markdown(f"<table style='width:100%;border-collapse:collapse;font-family:Share Tech Mono,monospace;font-size:.68rem;'><tbody>{rows_html}</tbody></table>", unsafe_allow_html=True)
+    else:
+        st.markdown("<div style='font-family:Share Tech Mono,monospace;font-size:.7rem;color:#2a4a3a;padding:1rem;text-align:center;'>⌛ AWAITING FIRST SCAN…</div>", unsafe_allow_html=True)
+
+# ── DARK POOL CCU LEDGER ───────────────────────────────────────────────────────
+with adv2:
+    if "dp_revenue" not in st.session_state:
+        st.session_state.dp_revenue  = 0.0
+        st.session_state.dp_notif    = ""
+        st.session_state.dp_prev_ccu = 0.0
+
+    prev_ccu = st.session_state.dp_prev_ccu
+    curr_ccu = st.session_state.total_ccu
+    if curr_ccu > prev_ccu and run_now:
+        diff = curr_ccu - prev_ccu
+        price = round(22 + np.random.uniform(0, 4), 2)
+        st.session_state.dp_revenue  += round(diff * price, 2)
+        st.session_state.dp_notif     = f"EXECUTING DARK POOL LIQUIDATION: {diff:.4f} CCU → ${diff*price:.2f}"
+    elif run_now:
+        st.session_state.dp_notif = ""
+    st.session_state.dp_prev_ccu = curr_ccu
+
+    BUYERS  = ["BlackRock ESG", "Vanguard Carbon", "PIMCO Climate", "Citadel Green", "BofA Climate"]
+    SELLERS = ["JPM Carbon Desk", "Goldman ESG", "Morgan Stanley", "Barclays CCU", "Bridgewater"]
+    import random
+    bids = sorted([(round(19+random.random()*5,2), random.randint(1,50), random.choice(BUYERS)) for _ in range(5)], reverse=True)
+    asks = sorted([(round(22+random.random()*5,2), random.randint(1,50), random.choice(SELLERS)) for _ in range(5)])
+
+    notif_html = f"""<div style="background:rgba(0,255,157,0.1);border:1px solid #00ff9d;border-radius:4px;
+      padding:5px 10px;font-size:9px;color:#00ff9d;letter-spacing:1px;font-weight:bold;margin-bottom:8px;">
+      ▶ {st.session_state.dp_notif}</div>""" if st.session_state.dp_notif else ""
+
+    bid_rows = "".join(f"<tr><td style='color:#00ff9d;font-weight:bold'>${p}</td><td style='color:#4a8a6a'>{q}</td><td style='color:#2a4a3a'>{e[:16]}</td></tr>" for p,q,e in bids)
+    ask_rows = "".join(f"<tr><td style='color:#ff4b4b;font-weight:bold'>${p}</td><td style='color:#8a4a4a'>{q}</td><td style='color:#4a2a2a'>{e[:16]}</td></tr>" for p,q,e in asks)
+
+    st.markdown(f"""
+    <div style="background:rgba(11,15,18,0.72);backdrop-filter:blur(14px);
+      border:1px solid rgba(0,255,157,0.15);border-left:3px solid #00ff9d;
+      border-radius:8px;padding:12px 14px;font-family:Share Tech Mono,monospace;">
+      <div style="font-size:10px;letter-spacing:3px;color:#00ff9d;margin-bottom:8px;">
+        ♻ DARK POOL LEDGER — CCU Secondary Market</div>
+      <div style="background:linear-gradient(135deg,#001a0d,#002a14);border:1px solid #00ff9d33;
+        border-radius:6px;padding:8px 12px;text-align:center;margin-bottom:8px;">
+        <div style="font-size:8px;letter-spacing:3px;color:#4a8a6a;margin-bottom:2px;">SECONDARY ESG REVENUE YIELD</div>
+        <div style="font-size:26px;font-weight:bold;color:#00ff9d;text-shadow:0 0 12px #00ff9d66;">
+          ${st.session_state.dp_revenue:,.2f}</div>
+        <div style="font-size:8px;color:#4a6a5a;margin-top:2px;">CCUs MINTED: {curr_ccu:.4f} kg · POOL: ACTIVE</div></div>
+      {notif_html}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="font-size:8px;color:#00ff9d;letter-spacing:2px;margin-bottom:4px;">▼ BIDS (BUY)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:8px;">
+            <tr style="color:#4a6a5a;font-size:7px;"><th>PRICE</th><th>QTY</th><th>ENTITY</th></tr>
+            {bid_rows}</table></div>
+        <div>
+          <div style="font-size:8px;color:#ff4b4b;letter-spacing:2px;margin-bottom:4px;">▲ ASKS (SELL)</div>
+          <table style="width:100%;border-collapse:collapse;font-size:8px;">
+            <tr style="color:#4a6a5a;font-size:7px;"><th>PRICE</th><th>QTY</th><th>ENTITY</th></tr>
+            {ask_rows}</table></div></div></div>
+    """, unsafe_allow_html=True)
+
+# ── THERMAL MATRIX ─────────────────────────────────────────────────────────────
+st.markdown('<div class="slbl">▸ Thermal Matrix — AMD MI325X Bare-Metal Array</div>', unsafe_allow_html=True)
+
+if "node_temps" not in st.session_state:
+    st.session_state.node_temps = [45.0] * 8
+
+active = st.session_state.power_history.get("Server_Wattage", pd.Series()).eq(1000).sum() \
+    if not st.session_state.power_history.empty and "Server_Wattage" in st.session_state.power_history.columns else 0
+
+if run_now:
+    new_temps = []
+    for t in st.session_state.node_temps:
+        if active > 0:
+            new_temps.append(min(85.0, round(t + np.random.uniform(1.0, 3.0), 1)))
+        else:
+            new_temps.append(max(45.0, round(t - np.random.uniform(0.5, 1.5), 1)))
+    st.session_state.node_temps = new_temps
+
+temps = st.session_state.node_temps
+max_temp = max(temps)
+avg_temp = round(sum(temps)/8, 1)
+is_critical = max_temp >= 80
+master_color = "#ff4b4b" if is_critical else "#4488ff"
+master_text  = "🔴 THERMAL DEGRADATION WARNING" if is_critical else "🔵 THERMAL STABLE"
+
+NODE_LABELS = ["MI325X-01","MI325X-02","MI325X-03","MI325X-04","MI325X-05","MI325X-06","MI325X-07","MI325X-08"]
+NODE_ROLES  = ["EAA GATE","BROWNIAN","SPREAD","FX ENGINE","CCU MINT","LEDGER","PREDICTOR","WATCHDOG"]
+
+def _temp_color(t):
+    if t <= 50:  return "#003080"
+    if t <= 60:  return "#5500bb"
+    if t <= 70:  return "#8b0050"
+    if t <= 78:  return "#c82800"
+    return "#ff4b4b"
+
+def _temp_glow(t):
+    if t <= 50:  return "0 0 12px rgba(0,80,255,0.5)"
+    if t <= 60:  return "0 0 14px rgba(120,0,255,0.5)"
+    if t <= 70:  return "0 0 16px rgba(255,80,0,0.5)"
+    return "0 0 22px rgba(255,75,75,0.7)"
+
+node_cells = ""
+for i, t in enumerate(temps):
+    bg   = _temp_color(t)
+    glow = _temp_glow(t)
+    pct  = int(((t-45)/(85-45))*100)
+    tc   = "#4488ff" if t<=50 else "#aa44ff" if t<=60 else "#ff8800" if t<=70 else "#ff4b4b"
+    node_cells += f"""
+    <div style="background:{bg};border:1px solid {tc}55;border-radius:6px;padding:10px 8px;
+      text-align:center;box-shadow:{glow};transition:background .4s;">
+      <div style="font-size:8px;color:#c8d6e5;letter-spacing:1px;margin-bottom:4px;">{NODE_LABELS[i]}</div>
+      <div style="font-size:18px;font-weight:bold;color:{tc};line-height:1.1">{t}°</div>
+      <div style="font-size:7px;color:{tc}aa;margin-top:2px">{NODE_ROLES[i]}</div>
+      <div style="margin-top:5px;background:rgba(0,0,0,0.4);border-radius:2px;height:3px;overflow:hidden">
+        <div style="width:{pct}%;height:100%;background:{tc};transition:width .4s"></div></div>
+      <div style="font-size:7px;color:{tc}88;margin-top:2px">{pct}%</div></div>"""
+
+st.markdown(f"""
+<div style="background:rgba(11,15,18,0.72);backdrop-filter:blur(14px);
+  border:1px solid {master_color}33;border-left:3px solid {master_color};
+  border-radius:8px;padding:14px 16px;font-family:Share Tech Mono,monospace;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <div style="font-size:10px;letter-spacing:2px;color:{master_color};font-weight:bold;">{master_text}</div>
+    <div style="font-size:9px;color:#4a6a5a">AVG: {avg_temp}°C · PEAK: {max_temp}°C · ACTIVE SCANS: {active}</div></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">{node_cells}</div>
+  <div style="margin-top:8px;display:flex;justify-content:space-between;font-size:8px;color:#4a6a5a;
+    border-top:1px solid #1a2a22;padding-top:6px;letter-spacing:1px">
+    <span>ACTIVE SCANS: <span style="color:#00ff9d">{active}</span></span>
+    <span>ESTIMATED DRAW: <span style="color:{master_color}">{'~8×1000W' if is_critical else '~8×150W'}</span></span>
+    <span>MODE: <span style="color:{master_color}">{'PEAK' if active>0 else 'ECO'}</span></span></div></div>
+""", unsafe_allow_html=True)
+
 # Footer
 st.markdown(f"""<div class="fixed-footer"><span>NODE: REC-AIML-SEC-D | ID: 251501249 | OPERATOR: K. VISAGAN | KERNEL: GREENARB-V2.0.5</span><span style='color:#1a3a2a'>SCANS: {st.session_state.scan_count} | CCU: {st.session_state.total_ccu:.2f}kg | AUTO: {"ON ●" if "auto_pilot" in dir() and auto_pilot else "OFF ○"}</span></div>""", unsafe_allow_html=True)
 

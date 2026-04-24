@@ -22,7 +22,100 @@ st.set_page_config(page_title="GreenArb 2.0", page_icon="⚡", layout="wide",
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
-html,body,[data-testid="stAppViewContainer"],[data-testid="stApp"]{background:#0b0f12!important;color:#c8d6e5!important;font-family:'Rajdhani',sans-serif!important;}
+
+/* ── TASK 1: Global Typography Overhaul ──────────────────────────────────── */
+html, body, [class*="st-"],
+[data-testid="stAppViewContainer"],
+[data-testid="stApp"],
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] span,
+.stDataFrame, .stDataFrame td, .stDataFrame th {
+    font-size: 1.15rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    font-family: 'Rajdhani', sans-serif !important;
+}
+html, body,
+[data-testid="stAppViewContainer"],
+[data-testid="stApp"] {
+    background: #0b0f12 !important;
+    color: #c8d6e5 !important;
+}
+/* Streamlit native metric big numbers */
+[data-testid="stMetricValue"] {
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    color: #00ff9d !important;
+    font-family: 'Share Tech Mono', monospace !important;
+}
+[data-testid="stMetricLabel"] {
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 2px !important;
+    color: #5a7a6a !important;
+    font-family: 'Share Tech Mono', monospace !important;
+}
+[data-testid="stMetricDelta"] {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}
+/* Toggle & button labels */
+[data-testid="stToggle"] label,
+[data-testid="stButton"] button {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* ── Kill Switch Button ───────────────────────────────────────────────────── */
+.kill-switch-btn > button {
+    background: linear-gradient(135deg, #2a0505, #400a0a) !important;
+    border: 2px solid #ff4b4b !important;
+    border-radius: 6px !important;
+    color: #ff4b4b !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.5px !important;
+    width: 100% !important;
+    padding: 0.7rem 0.5rem !important;
+    box-shadow: 0 0 18px #ff4b4b33 !important;
+    transition: all 0.2s ease !important;
+    animation: redpulse 2.5s ease-in-out infinite !important;
+}
+.kill-switch-btn > button:hover {
+    background: linear-gradient(135deg, #400a0a, #660d0d) !important;
+    box-shadow: 0 0 40px #ff4b4b77 !important;
+    transform: scale(1.02) !important;
+}
+@keyframes redpulse { 0%,100%{box-shadow:0 0 14px #ff4b4b33} 50%{box-shadow:0 0 36px #ff4b4b88} }
+
+/* ── Portfolio AUM card (large) ───────────────────────────────────────────── */
+.aum-card {
+    background: linear-gradient(145deg, #0a1a10, #0d2018);
+    border: 1px solid #00ff9d44;
+    border-left: 4px solid #00ff9d;
+    border-radius: 8px;
+    padding: 1rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+}
+.aum-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 30%;
+    background: radial-gradient(ellipse at right, #00ff9d0a 0%, transparent 70%);
+    pointer-events: none;
+}
+.aum-label  { font-family:'Share Tech Mono',monospace; font-size:.72rem; color:#4a8a6a; letter-spacing:3px; text-transform:uppercase; margin-bottom:.3rem; }
+.aum-value  { font-family:'Share Tech Mono',monospace; font-size:2.5rem; color:#00ff9d; font-weight:900; line-height:1.05; text-shadow:0 0 20px #00ff9d55; }
+.aum-sub    { font-family:'Share Tech Mono',monospace; font-size:.68rem; color:#3d5a50; margin-top:.2rem; letter-spacing:1px; }
+.pnl-pos    { font-family:'Share Tech Mono',monospace; font-size:2.5rem; font-weight:900; color:#00ff9d; line-height:1.05; }
+.pnl-neg    { font-family:'Share Tech Mono',monospace; font-size:2.5rem; font-weight:900; color:#ff4b4b; line-height:1.05; }
+.pnl-card   { background:linear-gradient(145deg,#111820,#0d1520); border:1px solid #00ff9d22; border-left:4px solid #00ccff; border-radius:8px; padding:1rem 1.4rem; }
+
 #MainMenu,header,footer,[data-testid="stToolbar"],[data-testid="stDecoration"]{display:none!important;}
 .block-container{padding:1rem 2rem 5rem 2rem!important;}
 .header-bar{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #00ff9d33;padding-bottom:.5rem;margin-bottom:1rem;}
@@ -31,25 +124,25 @@ html,body,[data-testid="stAppViewContainer"],[data-testid="stApp"]{background:#0
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .metric-card{background:linear-gradient(145deg,#111820,#0d1520);border:1px solid #00ff9d22;border-radius:6px;padding:.9rem 1.1rem;position:relative;overflow:hidden;}
 .metric-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:#00ff9d;}
-.metric-label{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#5a7a6a;letter-spacing:2px;text-transform:uppercase;margin-bottom:.25rem;}
-.metric-value{font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:#00ff9d;font-weight:700;line-height:1.1;}
+.metric-label{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#5a7a6a;letter-spacing:2px;text-transform:uppercase;margin-bottom:.25rem;font-weight:700;}
+.metric-value{font-family:'Share Tech Mono',monospace;font-size:2.5rem;color:#00ff9d;font-weight:900;line-height:1.05;}
 .metric-value.neg{color:#ff4b4b;}
-.metric-sub{font-size:.68rem;color:#3d5a50;margin-top:.15rem;font-family:'Share Tech Mono',monospace;}
+.metric-sub{font-size:.72rem;color:#3d5a50;margin-top:.15rem;font-family:'Share Tech Mono',monospace;font-weight:600;}
 .gate-ok{background:linear-gradient(135deg,#001a0d,#002a14);border:1px solid #00ff9d;border-left:4px solid #00ff9d;border-radius:6px;padding:1rem 1.3rem;box-shadow:0 0 24px #00ff9d22;}
 .gate-ko{background:linear-gradient(135deg,#1a0a00,#2a1200);border:1px solid #ff8c00;border-left:4px solid #ff4b4b;border-radius:6px;padding:1rem 1.3rem;box-shadow:0 0 24px #ff4b4b22;}
-.gt{font-family:'Share Tech Mono',monospace;font-size:.95rem;letter-spacing:2px;font-weight:700;margin-bottom:.4rem;}
+.gt{font-family:'Share Tech Mono',monospace;font-size:1rem;letter-spacing:2px;font-weight:700;margin-bottom:.4rem;}
 .gate-ok .gt{color:#00ff9d;}.gate-ko .gt{color:#ff4b4b;}
-.gb{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:#8aadaa;line-height:1.6;}
+.gb{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:#8aadaa;line-height:1.7;font-weight:600;}
 .gate-ko .gb{color:#c0856a;}
 .hw{display:flex;gap:.8rem;margin-top:.6rem;flex-wrap:wrap;}
-.hb{background:#0d1520;border:1px solid #1e3a2a;border-radius:4px;padding:.25rem .7rem;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#4a8a6a;letter-spacing:1px;}
-.slbl{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#2a4a3a;letter-spacing:3px;text-transform:uppercase;border-bottom:1px solid #1a2a22;padding-bottom:.3rem;margin:1.2rem 0 .7rem;}
+.hb{background:#0d1520;border:1px solid #1e3a2a;border-radius:4px;padding:.3rem .8rem;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#4a8a6a;letter-spacing:1px;font-weight:700;}
+.slbl{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#2a4a3a;letter-spacing:3px;text-transform:uppercase;border-bottom:1px solid #1a2a22;padding-bottom:.3rem;margin:1.2rem 0 .7rem;font-weight:700;}
 .tgt{background:linear-gradient(135deg,#001a0d,#00300f);border:2px solid #00ff9d;border-radius:8px;padding:1.2rem 2rem;text-align:center;box-shadow:0 0 50px #00ff9d33;margin-bottom:.8rem;animation:bglow 2.5s ease-in-out infinite;}
 @keyframes bglow{0%,100%{box-shadow:0 0 30px #00ff9d33}50%{box-shadow:0 0 70px #00ff9d77}}
-.tgt-lbl{font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:4px;color:#4a8a6a;text-transform:uppercase;margin-bottom:.3rem;}
+.tgt-lbl{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:4px;color:#4a8a6a;text-transform:uppercase;margin-bottom:.3rem;font-weight:700;}
 .tgt-name{font-family:'Share Tech Mono',monospace;font-size:2.6rem;font-weight:900;color:#00ff9d;letter-spacing:6px;text-shadow:0 0 25px #00ff9d88;line-height:1.1;}
-.tgt-sub{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:#4a8a6a;letter-spacing:2px;margin-top:.3rem;}
-.fixed-footer{position:fixed;bottom:0;left:0;right:0;background:#07090b;border-top:1px solid #00ff9d22;padding:.4rem 2rem;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#2a4a3a;letter-spacing:2px;display:flex;justify-content:space-between;align-items:center;z-index:999;}
+.tgt-sub{font-family:'Share Tech Mono',monospace;font-size:.8rem;color:#4a8a6a;letter-spacing:2px;margin-top:.3rem;font-weight:600;}
+.fixed-footer{position:fixed;bottom:0;left:0;right:0;background:#07090b;border-top:1px solid #00ff9d22;padding:.4rem 2rem;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#2a4a3a;letter-spacing:2px;display:flex;justify-content:space-between;align-items:center;z-index:999;}
 [data-testid="stExpander"]{background:#0d1318!important;border:1px solid #1a3328!important;border-radius:6px!important;}
 </style>""", unsafe_allow_html=True)
 
@@ -58,7 +151,9 @@ for k, v in [("audit_log",[]),("total_ccu",0.0),("scan_count",0),
              ("last_data",None),("radar_df",None),
              ("scan_history",pd.DataFrame()),
              ("power_history",pd.DataFrame()),
-             ("baseline_df",None),("usd_inr_rate",83.5)]:
+             ("baseline_df",None),("usd_inr_rate",83.5),
+             ("portfolio_aum", 500_000_000.0),("cumulative_pnl", 0.0),
+             ("kill_switch", False)]:
     if k not in st.session_state:
         st.session_state[k] = v
 
@@ -75,6 +170,45 @@ st.markdown("""
   <div class="header-title">⚡ GreenArb 2.0 — Nifty 50 ADR Arbitrage</div>
   <div class="header-status">L1 FEED: Brownian Sim | KERNEL: GREENARB-V2.0.5-LIVE</div>
 </div>""", unsafe_allow_html=True)
+
+# ── Portfolio & Security Header ──────────────────────────────────────────────
+ph_col1, ph_col2, ph_col3 = st.columns([2, 1, 1])
+
+with ph_col1:
+    aum = st.session_state.portfolio_aum
+    st.markdown(f"""
+    <div class="aum-card">
+      <div class="aum-label">⚡ Portfolio AUM — Capital Under Management</div>
+      <div class="aum-value">₹{aum:,.2f}</div>
+      <div class="aum-sub">SIMULATED NOTIONAL · GREENARB-V2.0.5-LIVE · NSE COLOCATION</div>
+    </div>""", unsafe_allow_html=True)
+
+with ph_col2:
+    pnl = st.session_state.cumulative_pnl
+    pnl_cls = "pnl-pos" if pnl >= 0 else "pnl-neg"
+    pnl_sign = "+" if pnl >= 0 else ""
+    st.markdown(f"""
+    <div class="pnl-card">
+      <div class="aum-label">📈 Cumulative P&amp;L</div>
+      <div class="{pnl_cls}">{pnl_sign}₹{pnl:,.2f}</div>
+      <div class="aum-sub">Net EAA Aggregated · All Agents</div>
+    </div>""", unsafe_allow_html=True)
+
+with ph_col3:
+    st.markdown('<div class="kill-switch-btn">', unsafe_allow_html=True)
+    kill_pressed = st.button("🛑 EMERGENCY SYSTEM HALT\n(KILL SWITCH)", key="kill_switch_btn", use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    if kill_pressed:
+        st.session_state.kill_switch = True
+
+# ── Kill switch enforcement ────────────────────────────────────────────────────
+if st.session_state.kill_switch:
+    st.error(
+        "🛑 TRADING HALTED BY OPERATOR. ALL AGENTS DISENGAGED. "
+        "System locked. Refresh or press F5 to re-arm.",
+        icon="🛑",
+    )
+    st.stop()
 
 # ── Controls ──────────────────────────────────────────────────────────────────
 ctrl, ts_col = st.columns([2, 5])
@@ -107,6 +241,9 @@ if run_now:
 
     st.session_state.scan_count += 1
     st.session_state.total_ccu  += gate_result["ccu_minted"]
+    # Accumulate P&L: add Net EAA only on EXECUTE decisions
+    if gate_result["status"] == "EXECUTE":
+        st.session_state.cumulative_pnl += gate_result["eaa"]
     st.session_state.radar_df    = radar_df
     st.session_state.last_data   = dict(
         nse_price=nse_price, nyse_price=nyse_inr, fx_rate=fx_rate,
@@ -263,21 +400,77 @@ if d:
 
         # ── TAB 1: Treemap ────────────────────────────────────────────────────
         with tab1:
-            mx = max(df["Net EAA ₹"].abs().max(), 1.0)
-            ft = px.treemap(df,
-                path=[px.Constant("🟢 Nifty 50"), "Sector", "Ticker"],
-                values="NSE ₹", color="Net EAA ₹",
-                hover_data={"Name":True,"Spread ₹":":.2f","Decision":True,"Power Mode":True,"Status":True,"NSE ₹":False},
+            display_df = df.copy()
+            display_df["Power State"] = display_df["Decision"].apply(lambda x: "EXECUTE" if "EXECUTE" in str(x) else "UNDERCLOCK")
+            # Task 2: Equal Box Sizing — dummy column forces uniform masonry grid
+            display_df["Grid_Size"] = 1
+
+            mx = max(display_df["Net EAA ₹"].abs().max(), 1.0)
+            # Task 1: Flatten hierarchy — remove Sector grouping entirely
+            ft = px.treemap(display_df,
+                path=[px.Constant("Nifty 50"), "Ticker"],
+                values="Grid_Size", color="Net EAA ₹",
+                hover_data={"Net EAA ₹": True},
                 color_continuous_scale=[[0,"#ff4b4b"],[.44,"#2a0a0a"],[.5,"#0d1318"],[.56,"#001a0d"],[1,"#00ff9d"]],
                 range_color=[-mx, mx], color_continuous_midpoint=0,
                 title=f"Nifty 50 ADR Heatmap — Scan #{st.session_state.scan_count}",
             )
-            ft.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Share Tech Mono",color="#c8d6e5",size=11),
-                title_font=dict(color="#00ff9d",size=12),
-                coloraxis_colorbar=dict(title="Net EAA",tickprefix="₹",tickfont=dict(color="#c8d6e5",size=9),title_font=dict(color="#00ff9d"),bgcolor="rgba(13,19,24,0.9)",bordercolor="#1e3a2a",borderwidth=1),
-                margin=dict(l=0,r=0,t=36,b=0))
-            ft.update_traces(texttemplate="<b>%{label}</b><br>₹%{color:+,.0f}", textfont_size=11)
+
+            custom_texts = []
+            custom_hovers = []
+            ticker_to_row = display_df.set_index("Ticker").to_dict(orient="index")
+
+            import math
+            for label, id_val, cdata in zip(ft.data[0].labels, ft.data[0].ids, ft.data[0].customdata):
+                try:
+                    eaa_val = float(cdata[0]) if cdata is not None and len(cdata) > 0 else 0
+                    if math.isnan(eaa_val): eaa_val = 0
+                except (ValueError, TypeError):
+                    eaa_val = 0
+
+                # Flat path: ticker nodes have exactly one '/' (e.g. "Nifty 50/INFY")
+                if id_val and id_val.count('/') == 1:
+                    if abs(eaa_val) >= 1000:
+                        eaa_str = f"₹{eaa_val/1000:+,.0f}k"
+                    else:
+                        eaa_str = f"₹{eaa_val:+,.0f}"
+                    custom_texts.append(f"<b>{label}</b><br>{eaa_str}")
+
+                    row = ticker_to_row.get(label, {})
+                    sector = row.get("Sector", "N/A")
+                    name = row.get("Name", label)
+                    pstate = row.get("Power State", "UNKNOWN")
+                    custom_hovers.append(f"<b>Sector:</b> {sector}<br><b>Ticker:</b> {name}<br><b>Net EAA:</b> ₹{eaa_val:+,.2f}<br><b>Power State:</b> {pstate}")
+                else:
+                    custom_texts.append("")
+                    custom_hovers.append(f"<b>{label}</b><br><b>Aggregate Net EAA:</b> ₹{eaa_val:+,.2f}")
+
+            ft.data[0].text = custom_texts
+            ft.data[0].textinfo = "text"
+            ft.data[0].texttemplate = "%{text}"
+            ft.data[0].hovertext = custom_hovers
+            ft.data[0].hovertemplate = "%{hovertext}<extra></extra>"
+
+            # Task 3: Text alignment — center every label in its block
+            ft.update_traces(
+                textposition="middle center",
+                marker=dict(pad=dict(t=4, l=4, r=4, b=4)),
+            )
+            # Task 3: Tight margins — maximise screen real estate
+            ft.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Share Tech Mono", color="#c8d6e5"),
+                title_font=dict(color="#00ff9d", size=12),
+                coloraxis_colorbar=dict(
+                    title="Net EAA", tickprefix="₹",
+                    tickfont=dict(color="#c8d6e5", size=9),
+                    title_font=dict(color="#00ff9d"),
+                    bgcolor="rgba(13,19,24,0.9)",
+                    bordercolor="#1e3a2a", borderwidth=1,
+                ),
+                margin=dict(t=30, l=0, r=0, b=0),
+            )
+
             st.plotly_chart(ft, use_container_width=True, config={"displayModeBar":False})
             ex = (df["Decision"].str.contains("EXECUTE")).sum()
             st.markdown(f"<div style='font-family:Share Tech Mono,monospace;font-size:.65rem;color:#4a6a5a;letter-spacing:2px;'>▸ EXECUTE: <span style='color:#00ff9d'>{ex}</span> | UNDERCLOCKING: <span style='color:#ff8c00'>{len(df)-ex}</span> | TARGET: <span style='color:#00ff9d'>{df.iloc[0]['Ticker']}</span> (₹{df.iloc[0]['Net EAA ₹']:+,.2f})</div>", unsafe_allow_html=True)

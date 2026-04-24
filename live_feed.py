@@ -130,13 +130,13 @@ def fetch_baseline_prices() -> Tuple[pd.DataFrame, float]:
         # NSE price
         nse_sym    = cfg["nse"]
         nse_price  = float(closes.get(nse_sym, 0) or 0)
-        if nse_price <= 0:
+        if pd.isna(nse_price) or nse_price <= 0:
             nse_price = _safe_price(nse_sym) or 1000.0   # individual fallback
 
         # ADR price (INR equiv)
         if cfg["nyse"]:
             adr_usd = float(closes.get(cfg["nyse"], 0) or 0)
-            if adr_usd <= 0:
+            if pd.isna(adr_usd) or adr_usd <= 0:
                 adr_usd = _safe_price(cfg["nyse"]) or (nse_price / usd_inr)
             adr_inr = (adr_usd * usd_inr) / cfg["ratio"]
         else:
